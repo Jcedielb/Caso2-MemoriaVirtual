@@ -1,3 +1,4 @@
+package referencias;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,7 +37,9 @@ public class GeneradorReferencias {
 
     private List<String> generarReferencias() {
         List<String> referencias = new ArrayList<>();
+        List<String> referenciasBordes = new ArrayList<>();
         int[][] filtro = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}}; // Ejemplo de filtro de 3x3
+        int[] ordenBordes = new int[]{0, 3}; // Índices para las filas/columnas de bordes exteriores
 
         // Offset inicial para los datos y resultados en la memoria
         int offsetDatos = filtro.length * filtro[0].length * 4; // 3x3 filtro, cada entero = 4 bytes
@@ -67,17 +70,19 @@ public class GeneradorReferencias {
                 referencias.add(String.format("R[%d][%d],%d,%d,W", i, j, paginaResultado, desplazamientoResultado));
             }
         }
-        for (int i = 0; i < filas; i++) {
+        for (int i : ordenBordes) {
             for (int j = 0; j < columnas; j++) {
-                // Solo para bordes, excluyendo el proceso central de filtrado
-                if (i == 0 || i == filas - 1 || j == 0 || j == columnas - 1) {
-                    int resultIndex = ((3 * 3) + (filas * columnas) + (i * columnas + j)) * 4;
-                    int paginaResult = resultIndex / tamanoPagina;
-                    int offsetResult = resultIndex % tamanoPagina;
-                    referencias.add(String.format("R[%d][%d],%d,%d,W", i, j, paginaResult, offsetResult));
-                }
+                agregarReferenciaBorde(referenciasBordes, i, j);
             }
         }
+        for (int i : ordenBordes) {
+            for (int j = 0; j < filas; j++) {
+                if (j == 0 || j == filas - 1) continue; // Evitar duplicados de las esquinas
+                agregarReferenciaBorde(referenciasBordes, j, i);
+            }
+        }
+        referencias.addAll(referenciasBordes); // Añadir las referencias de bordes al final
+    
         return referencias;
     }
 
@@ -90,4 +95,14 @@ public class GeneradorReferencias {
         int totalBytes = totalBytesFiltro + totalBytesDatos + totalBytesResultados;
         return (int) Math.ceil((double) totalBytes / tamanoPagina);
     }
+
+    private void agregarReferenciaBorde(List<String> referencias, int fila, int columna) {
+    // Asume que se ha definido la lógica para calcular `paginaResult` y `offsetResult`
+    // basado en las posiciones `fila` y `columna` para escritura.
+    int resultIndex = ((3 * 3) + (filas * columnas) + (fila * columnas + columna)) * 4;
+    int paginaResult = resultIndex / tamanoPagina;
+    int offsetResult = resultIndex % tamanoPagina;
+
+    referencias.add(String.format("R[%d][%d],%d,%d,W", fila, columna, paginaResult, offsetResult));
+}
 }
