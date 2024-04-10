@@ -86,4 +86,12 @@ public class SimuladorDePaginacion {
         simulador.cargarReferencias("referencias.txt"); // Suponiendo que el archivo se llama referencias.txt
         simulador.imprimirEstadisticas();
     }
+
+    public void actualizarBitRConcurrente() {
+        // TODO Auto-generated method stub
+        for (Pagina pagina : paginasEnRAM.values()) {
+            // Para cada página en RAM, actualiza su contador de envejecimiento
+            // Este proceso asume que ya existe un método en la clase Pagina que maneje adecuadamente la actualización del contador y el bit R
+            pagina.actualizarContador();    }
+}
 }
